@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>History Tutor — IB</title>
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* ================================
+       VARIABLES
+    ================================ */
+    :root {
+      --ink:        #1a1a1a;
+      --paper:      #f5f0e8;
+      --cream:      #ede8dc;
+      --accent:     #8b3a2a;
+      --accent-light: #c4614d;
+      --muted:      #7a7060;
+      --border:     #d4cebe;
+      --success:    #2d5a3d;
+    }
+
+    /* ================================
+       RESET & BASE
+    ================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    /* ================================
+       LAYOUT
+    ================================ */
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    /* ================================
+       HEADER
+    ================================ */
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .eyebrow {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.75rem;
+    }
+
+    h1 {
+      font-family: 'Libre Baskerville', serif;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1.2;
+      margin-bottom: 0.75rem;
+    }
+
+    .subtitle {
+      font-size: 0.95rem;
+      color: var(--muted);
+      font-weight: 300;
+      max-width: 480px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* ================================
+       FORM
+    ================================ */
+    .form-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    }
+
+    .field {
+      margin-bottom: 1.75rem;
+    }
+
+    .field:last-of-type {
+      margin-bottom: 0;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
+
+    label span {
+      color: var(--accent);
+    }
+
+    textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 0.875rem 1rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.92rem;
+      color: var(--ink);
+      background: var(--paper);
+      resize: vertical;
+      transition: border-color 0.2s;
+      line-height: 1.6;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      background: white;
+    }
+
+    textarea::placeholder {
+      color: #b0a898;
+    }
+
+    #consigna { min-height: 100px; }
+    #ensayo   { min-height: 280px; }
+
+    .word-count {
+      text-align: right;
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 0.35rem;
+    }
+
+    .word-count.warning { color: var(--accent); }
+    .word-count.ok      { color: var(--success); }
+
+    /* ================================
+       BUTTON
+    ================================ */
+    .btn {
+      width: 100%;
+      margin-top: 2rem;
+      padding: 0.9rem 2rem;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 3px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .btn:hover:not(:disabled) {
+      background: var(--accent-light);
+    }
+
+    .btn:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* ================================
+       LOADING
+    ================================ */
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 2.5rem;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      margin-bottom: 2rem;
+    }
+
+    .loading.visible { display: block; }
+
+    .spinner {
+      width: 28px;
+      height: 28px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 1rem;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading p {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .loading .steps {
+      margin-top: 1rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .step {
+      padding: 0.2rem 0;
+      opacity: 0.4;
+      transition: opacity 0.3s;
+    }
+
+    .step.active {
+      opacity: 1;
+      color: var(--accent);
+    }
+
+    .step.done {
+      opacity: 0.7;
+      color: var(--success);
+    }
+
+    /* ================================
+       RESULTADO
+    ================================ */
+    .result {
+      display: none;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    }
+
+    .result.visible { display: block; }
+
+    .result-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.75rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .result-header h2 {
+      font-family: 'Libre Baskerville', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .result-badge {
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--success);
+      background: #e8f0ea;
+      padding: 0.3rem 0.75rem;
+      border-radius: 2px;
+    }
+
+    .result-body {
+      font-size: 0.92rem;
+      line-height: 1.8;
+      color: var(--ink);
+      white-space: pre-wrap;
+    }
+
+    .result-body h3, .result-body strong {
+      font-family: 'Libre Baskerville', serif;
+      color: var(--accent);
+    }
+
+    .btn-reset {
+      margin-top: 1.75rem;
+      width: 100%;
+      padding: 0.75rem;
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-reset:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* ================================
+       ERROR
+    ================================ */
+    .error {
+      display: none;
+      background: #fdf0ee;
+      border: 1px solid #e8b4ac;
+      border-radius: 4px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 2rem;
+      font-size: 0.88rem;
+      color: var(--accent);
+      line-height: 1.6;
+    }
+
+    .error.visible { display: block; }
+
+    /* ================================
+       FOOTER
+    ================================ */
+    footer {
+      text-align: center;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.75rem;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <header>
+    <p class="eyebrow">IB History · Formative Feedback</p>
+    <h1>Essay Tutor</h1>
+    <p class="subtitle">
+      Submit your essay question and your essay to receive
+      personalised academic feedback before your final submission.
+    </p>
+  </header>
+
+  <!-- FORM -->
+  <div class="form-card" id="formCard">
+    <div class="field">
+      <label>Essay Question <span>*</span></label>
+      <textarea
+        id="consigna"
+        placeholder="Paste the official essay question here..."
+      ></textarea>
+    </div>
+
+    <div class="field">
+      <label>Your Essay <span>*</span></label>
+      <textarea
+        id="ensayo"
+        placeholder="Paste your complete essay here (700–1500 words)..."
+      ></textarea>
+      <p class="word-count" id="wordCount">0 words</p>
+    </div>
+
+    <button class="btn" id="submitBtn" onclick="submitEssay()">
+      Get Feedback
+    </button>
+  </div>
+
+  <!-- LOADING -->
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p>Analysing your essay — this may take a minute.</p>
+    <div class="steps">
+      <div class="step" id="step1">① Validating essay and question</div>
+      <div class="step" id="step2">② Analysing academic structure</div>
+      <div class="step" id="step3">③ Verifying historical content</div>
+      <div class="step" id="step4">④ Preparing feedback</div>
+    </div>
+  </div>
+
+  <!-- ERROR -->
+  <div class="error" id="error"></div>
+
+  <!-- RESULTADO -->
+  <div class="result" id="result">
+    <div class="result-header">
+      <h2>Feedback</h2>
+      <span class="result-badge">Complete</span>
+    </div>
+    <div class="result-body" id="resultBody"></div>
+    <button class="btn-reset" onclick="reset()">Submit another essay</button>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>This tool provides formative feedback only.</p>
+    <p>It does not assign grades and does not replace your teacher.</p>
+  </footer>
+
+</div>
+
+<script>
+  // ================================
+  // CONFIG
+  // Cambiá esta URL cuando el puerto de Oracle esté abierto
+  // ================================
+  const API_URL = "http://193.123.104.31:8000/feedback";
+
+  // ================================
+  // WORD COUNT
+  // ================================
+  const ensayoEl   = document.getElementById("ensayo");
+  const wordCountEl = document.getElementById("wordCount");
+
+  ensayoEl.addEventListener("input", () => {
+    const words = ensayoEl.value.trim().split(/\s+/).filter(w => w).length;
+    wordCountEl.textContent = `${words} words`;
+
+    if (words === 0) {
+      wordCountEl.className = "word-count";
+    } else if (words < 700 || words > 1500) {
+      wordCountEl.className = "word-count warning";
+    } else {
+      wordCountEl.className = "word-count ok";
+    }
+  });
+
+  // ================================
+  // LOADING STEPS ANIMATION
+  // Simula el progreso de los 4 agentes
+  // ================================
+  let stepTimer = null;
+
+  function startSteps() {
+    const steps = ["step1", "step2", "step3", "step4"];
+    const delays = [0, 8000, 18000, 28000]; // ms aproximados por agente
+
+    steps.forEach(id => {
+      document.getElementById(id).className = "step";
+    });
+
+    delays.forEach((delay, i) => {
+      setTimeout(() => {
+        if (i > 0) {
+          document.getElementById(steps[i-1]).className = "step done";
+        }
+        document.getElementById(steps[i]).className = "step active";
+      }, delay);
+    });
+  }
+
+  // ================================
+  // SUBMIT
+  // ================================
+  async function submitEssay() {
+    const consigna = document.getElementById("consigna").value.trim();
+    const ensayo   = ensayoEl.value.trim();
+
+    // Validación básica en el frontend
+    if (!consigna) {
+      showError("Please paste the essay question before submitting.");
+      return;
+    }
+    if (!ensayo) {
+      showError("Please paste your essay before submitting.");
+      return;
+    }
+
+    // UI: mostrar loading, ocultar form y errores
+    document.getElementById("formCard").style.display  = "none";
+    document.getElementById("error").className         = "error";
+    document.getElementById("result").className        = "result";
+    document.getElementById("loading").className       = "loading visible";
+    document.getElementById("submitBtn").disabled      = true;
+
+    startSteps();
+
+    try {
+      const response = await fetch(API_URL, {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ consigna, ensayo }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      // Mostrar resultado
+      document.getElementById("loading").className  = "loading";
+      document.getElementById("resultBody").textContent = data.devolucion;
+      document.getElementById("result").className   = "result visible";
+
+    } catch (err) {
+      document.getElementById("loading").className = "loading";
+      showError(
+        "Could not connect to the server. Please try again in a moment.<br>" +
+        "<small style='opacity:0.7'>" + err.message + "</small>"
+      );
+      document.getElementById("formCard").style.display = "block";
+      document.getElementById("submitBtn").disabled = false;
+    }
+  }
+
+  // ================================
+  // HELPERS
+  // ================================
+  function showError(msg) {
+    const el = document.getElementById("error");
+    el.innerHTML = msg;
+    el.className = "error visible";
+  }
+
+  function reset() {
+    document.getElementById("consigna").value       = "";
+    ensayoEl.value                                  = "";
+    wordCountEl.textContent                         = "0 words";
+    wordCountEl.className                           = "word-count";
+    document.getElementById("result").className     = "result";
+    document.getElementById("error").className      = "error";
+    document.getElementById("formCard").style.display = "block";
+    document.getElementById("submitBtn").disabled   = false;
+  }
+</script>
+
+</body>
+</html>
